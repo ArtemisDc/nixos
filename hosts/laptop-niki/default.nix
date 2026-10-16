@@ -5,10 +5,16 @@
     ./hardware-configuration.nix
     ../../modules/desktop/default.nix
   ];
-
+  
   environment.systemPackages = with pkgs; [
     kmonad
   ];
+
+  # Configure keymap in X11
+  services.xserver = {
+    layout = "us";
+    xkbOptions = "compose:ralt";
+  };
 
   services.kmonad = {
     enable = true;
