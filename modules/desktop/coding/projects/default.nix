@@ -1,0 +1,7 @@
+{ ... }:
+
+{
+  imports = [
+    ./pico-seclab.nix
+  ];
+}

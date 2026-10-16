@@ -1,0 +1,3 @@
+nixos/gitlab-token
+nixos/flake.lock
+nixos/eduroam/eduroam.env
