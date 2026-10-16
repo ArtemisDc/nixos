@@ -12,7 +12,6 @@
     mkHost = system: host: nixpkgs.lib.nixosSystem {
       inherit system;
       specialArgs = { inherit inputs; }; # this is the important part
-      specialArgs.pkgs-unstable = pkgsUnstable.${system};
       modules = [ ./hosts/${host} ];
     };
   in {
