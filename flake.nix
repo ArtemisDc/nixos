@@ -20,7 +20,7 @@
   in {
     nixosConfigurations = {
       laptop-niki = mkHost "x86_64-linux" "laptop-niki";
-      reverse-proxy = mkHost " x86_64-linux" "reverse-proxy";
+      reverse-proxy = mkHost "x86_64-linux" "reverse-proxy";
     };
   };
 }
