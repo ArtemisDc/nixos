@@ -12,7 +12,10 @@
     mkHost = system: host: nixpkgs.lib.nixosSystem {
       inherit system;
       specialArgs = { inherit inputs; }; # this is the important part
-      modules = [ ./hosts/${host} ];
+      modules = [ 
+        ./hosts/${host} 
+        { networking.hostName = host; }
+      ];
     };
   in {
     nixosConfigurations = {
