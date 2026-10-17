@@ -27,6 +27,7 @@
     lanSubnets = [ 
       "192.168.10.0/24" 
       "192.168.30.0/24"
+      "192.168.159.0/24"
     ];
     virtualHosts = {
       "radarr.trester.net".upstream = "http://radarr.int.trester.net:7878";
