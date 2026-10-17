@@ -14,6 +14,7 @@
 
 {
   imports = [
+    ./hardware-configuration.nix
     ../../modules/server/base.nix
     ../../modules/server/users.nix
     ../../modules/server/qemu-guest.nix
