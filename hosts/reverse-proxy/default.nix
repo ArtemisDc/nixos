@@ -14,10 +14,10 @@
 
 {
   imports = [
-    ../../modules/base.nix
-    ../../modules/users.nix
-    ../../modules/qemu-guest.nix
-    ../../modules/caddy-reverse-proxy.nix
+    ../../modules/server/base.nix
+    ../../modules/server/users.nix
+    ../../modules/server/qemu-guest.nix
+    ../../modules/server/caddy-reverse-proxy.nix
   ];
 
   modules.caddyReverseProxy = {
