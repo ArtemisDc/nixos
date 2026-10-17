@@ -29,7 +29,7 @@
     ];
     virtualHosts = {
       "radarr.trester.net".upstream = "http://radarr.int.trester.net:7878";
-      "jellyfin.trester.net".upstream= { "http://jellyfin.int.trester.net"; public = true; };
+      "jellyfin.trester.net".upstream= { "http://jellyfin.int.trester.net:80"; public = true; };
     };
   };
 
