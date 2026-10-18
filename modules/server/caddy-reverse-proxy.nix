@@ -20,7 +20,8 @@
 # Certificates come from Let's Encrypt via ACME DNS-01 against Cloudflare (caddy-dns/cloudflare
 # plugin), so issuance needs no inbound port and works the same for LAN-only names. Private names
 # need no public DNS record, but each still shows up in certificate transparency logs. The API
-# token (Zone → DNS → Edit on the zone) is provisioned out-of-band at
+# token (Zone → Zone → Read and Zone → DNS → Edit, both on the zone; without Zone Read the
+# plugin can't look the zone up and fails with "expected 1 zone, got 0") is provisioned out-of-band at
 # /var/lib/caddy/cloudflare-api-token (root, 0600) and handed to Caddy as a systemd credential;
 # the Caddyfile reads it at runtime through Caddy's {file.*} placeholder.
 #
@@ -175,9 +176,13 @@ in {
       # inline on `acme_dns`: that way it's loaded with the TLS app even when no ACME issuer is
       # in play, so a missing or malformed token stops Caddy at startup instead of at renewal.
       # trusted_proxies is scoped to the public listener; on 443 the client IP is the peer.
+      # tls_resolvers sends the challenge's zone (SOA) lookup and propagation checks to public
+      # resolvers: a split-horizon LAN resolver that answers the vhost names locally has no SOA
+      # for the zone, so Caddy would settle on the TLD ("expected 1 zone, got 0 for net.").
       globalConfig = ''
         dns cloudflare {file.{$CREDENTIALS_DIRECTORY}/cloudflare-api-token}
         acme_dns
+        tls_resolvers 1.1.1.1 1.0.0.1
       '' + lib.optionalString anyPublic ''
 
         servers :${port} {
