@@ -21,12 +21,6 @@
     ../../modules/server/caddy-reverse-proxy.nix
   ];
 
-  networking = {
-    interfaces.enp1s0.ipv6.addresses = [
-      { address = "2001:1438:4018:5e4b::10"; prefixLength = 64; }
-    ];
-  };
-
   modules.caddyReverseProxy = {
     enable = true;
     acmeEmail = "nt@trester.net";
