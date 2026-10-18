@@ -47,6 +47,11 @@ let
 
     reverse_proxy ${vhost.upstream} {
       header_up X-Real-IP {client_ip}
+      ${lib.optionalString vhost.insecureUpstreamTls ''
+        transport http {
+          tls_insecure_skip_verify
+        }
+      ''}
     }
 
     header -Server
@@ -103,6 +108,15 @@ in {
             example = "http://192.168.1.20:8080";
             description = "Backend Caddy proxies to (anything `reverse_proxy` accepts).";
           };
+          insecureUpstreamTls = lib.mkOption {
+            type = lib.types.bool;
+            default = false;
+            description = ''
+              Accept any certificate from an https:// upstream (self-signed, expired, wrong
+              name). The hop to the backend stays encrypted but is no longer authenticated, so
+              only use this for backends on a network you trust.
+            '';
+          };
           public = lib.mkOption {
             type = lib.types.bool;
             default = false;
@@ -131,7 +145,10 @@ in {
     assertions = [{
       assertion = cfg.publicPort != 443 && cfg.publicPort != 80;
       message = "modules.caddyReverseProxy.publicPort must differ from the LAN listeners (80, 443).";
-    }];
+    }] ++ lib.mapAttrsToList (name: vhost: {
+      assertion = vhost.insecureUpstreamTls -> lib.hasPrefix "https://" vhost.upstream;
+      message = "modules.caddyReverseProxy.virtualHosts.\"${name}\".insecureUpstreamTls needs an https:// upstream.";
+    }) cfg.virtualHosts;
 
     # extraInputRules is nftables-only; require the backend.
     networking.nftables.enable = true;
