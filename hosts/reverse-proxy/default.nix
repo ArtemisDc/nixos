@@ -32,7 +32,7 @@
     virtualHosts = {
       "radarr.trester.net".upstream = "http://radarr.int.trester.net:7878";
       "sonarr.trester.net".upstream = "http://sonarr.int.trester.net:8989";
-      "lidarr.trester.net".upstream = "http://lidarr.int.trester.net:8686"
+      "lidarr.trester.net".upstream = "http://lidarr.int.trester.net:8686";
       "prowlarr.trester.net".upstream = "http://192.168.10.222:9696";
       "homeassistant.trester.net".upstream = "http://homeassistant.int.trester.net:8123";
       "dashy.trester.net".upstream = "http://192.168.159.209:4000";
