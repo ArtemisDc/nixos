@@ -31,7 +31,17 @@
     ];
     virtualHosts = {
       "radarr.trester.net".upstream = "http://radarr.int.trester.net:7878";
+      "sonarr.trester.net".upstream = "http://sonarr.int.trester.net:8989";
+      "lidarr.trester.net".upstream = "http://lidarr.int.trester.net:8686"
+      "prowlarr.trester.net".upstream = "http://192.168.10.222:9696";
+      "homeassistant.trester.net".upstream = "http://homeassistant.int.trester.net:8123";
+      "dashy.trester.net".upstream = "http://192.168.159.209:4000";
+      "torrent.trester.net".upstream = "http://torrent.int.trester.net:8090";
+      "nzb.trester.net".upstream = "http://192.168.10.225:8080";
+      "unifi-os.trester.net".upstream = "https://unifi-os.int.trester.net:11443"
+
       "jellyfin.trester.net" = { upstream = "http://jellyfin.int.trester.net:80"; public = true; };
+      "matrix.trester.net" = { upstream = "http://192.168.30.230:8008"; public = true; };
     };
   };
 
