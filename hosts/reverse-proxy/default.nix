@@ -24,6 +24,7 @@
   modules.caddyReverseProxy = {
     enable = true;
     acmeEmail = "nt@trester.net";
+    wildcardCerts = [ "*.trester.net" ];
     lanSubnets = [ 
       "192.168.10.0/24" 
       "192.168.30.0/24"
