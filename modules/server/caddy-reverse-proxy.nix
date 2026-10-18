@@ -19,7 +19,8 @@
 #
 # Certificates come from Let's Encrypt via ACME DNS-01 against Cloudflare (caddy-dns/cloudflare
 # plugin), so issuance needs no inbound port and works the same for LAN-only names. Private names
-# need no public DNS record, but each still shows up in certificate transparency logs. The API
+# need no public DNS record, but each still shows up in certificate transparency logs unless a
+# `wildcardCerts` entry covers it, in which case only the wildcard is logged. The API
 # token (Zone → Zone → Read and Zone → DNS → Edit, both on the zone; without Zone Read the
 # plugin can't look the zone up and fails with "expected 1 zone, got 0") is provisioned out-of-band at
 # /var/lib/caddy/cloudflare-api-token (root, 0600) and handed to Caddy as a systemd credential;
@@ -61,6 +62,17 @@ let
 in {
   options.modules.caddyReverseProxy = {
     enable = lib.mkEnableOption "Caddy reverse proxy for LAN services, some published via Cloudflare";
+
+    wildcardCerts = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [ ];
+      example = [ "*.example.com" ];
+      description = ''
+        Wildcard certificates to obtain. Caddy then skips individual certificates for vhosts
+        they cover, which keeps those hostnames out of certificate transparency logs. A
+        wildcard covers one label only: not the bare domain, not deeper subdomains.
+      '';
+    };
 
     acmeEmail = lib.mkOption {
       type = lib.types.str;
@@ -138,7 +150,10 @@ in {
         "jellyfin.example.com" = { upstream = "http://192.168.1.20:8096"; public = true; };
         "nas.example.com".upstream = "http://192.168.1.21:5000";
       };
-      description = "Map of hostname → backend. Each gets its own DNS-01 certificate.";
+      description = ''
+        Map of hostname → backend. Each gets its own DNS-01 certificate unless one of
+        `wildcardCerts` covers it.
+      '';
     };
   };
 
@@ -146,7 +161,10 @@ in {
     assertions = [{
       assertion = cfg.publicPort != 443 && cfg.publicPort != 80;
       message = "modules.caddyReverseProxy.publicPort must differ from the LAN listeners (80, 443).";
-    }] ++ lib.mapAttrsToList (name: vhost: {
+    }] ++ map (name: {
+      assertion = lib.hasPrefix "*." name;
+      message = "modules.caddyReverseProxy.wildcardCerts entry \"${name}\" must start with \"*.\".";
+    }) cfg.wildcardCerts ++ lib.mapAttrsToList (name: vhost: {
       assertion = vhost.insecureUpstreamTls -> lib.hasPrefix "https://" vhost.upstream;
       message = "modules.caddyReverseProxy.virtualHosts.\"${name}\".insecureUpstreamTls needs an https:// upstream.";
     }) cfg.virtualHosts;
@@ -179,10 +197,14 @@ in {
       # tls_resolvers sends the challenge's zone (SOA) lookup and propagation checks to public
       # resolvers: a split-horizon LAN resolver that answers the vhost names locally has no SOA
       # for the zone, so Caddy would settle on the TLD ("expected 1 zone, got 0 for net.").
+      # tls_automate_names manages the wildcards without a site block of their own; Caddy then
+      # skips per-name certificates for any vhost a managed wildcard covers.
       globalConfig = ''
         dns cloudflare {file.{$CREDENTIALS_DIRECTORY}/cloudflare-api-token}
         acme_dns
         tls_resolvers 1.1.1.1 1.0.0.1
+      '' + lib.optionalString (cfg.wildcardCerts != [ ]) ''
+        tls_automate_names ${lib.concatStringsSep " " cfg.wildcardCerts}
       '' + lib.optionalString anyPublic ''
 
         servers :${port} {
