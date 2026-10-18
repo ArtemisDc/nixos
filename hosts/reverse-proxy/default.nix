@@ -38,7 +38,7 @@
       "dashy.trester.net".upstream = "http://192.168.159.209:4000";
       "torrent.trester.net".upstream = "http://torrent.int.trester.net:8090";
       "nzb.trester.net".upstream = "http://192.168.10.225:8080";
-      "unifi-os.trester.net".upstream = "https://unifi-os.int.trester.net:11443"
+      "unifi-os.trester.net".upstream = "https://unifi-os.int.trester.net:11443";
 
       "jellyfin.trester.net" = { upstream = "http://jellyfin.int.trester.net:80"; public = true; };
       "matrix.trester.net" = { upstream = "http://192.168.30.230:8008"; public = true; };
