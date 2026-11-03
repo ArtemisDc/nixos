@@ -43,6 +43,7 @@
       "qui.trester.net".upstream = "http://torrent.int.trester.net:7476";
       "jellyfin.trester.net" = { upstream = "http://jellyfin.int.trester.net:80"; public = true; };
       "matrix.trester.net" = { upstream = "http://192.168.30.230:8008"; public = true; };
+      "autobrr.trester.net".upstream = "http://autobrr.int.trester.net:7474";
     };
   };
 
