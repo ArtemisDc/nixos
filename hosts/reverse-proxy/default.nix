@@ -45,6 +45,11 @@
       "matrix.trester.net" = { upstream = "http://192.168.30.230:8008"; public = true; };
       "autobrr.trester.net".upstream = "http://autobrr.int.trester.net:7474";
     };
+    ddns = {
+      enable = true;
+      domains = [ "reverse-proxy.trester.net" ];
+      ipv6 = true;
+    };
   };
 
   system.stateVersion = "26.05";

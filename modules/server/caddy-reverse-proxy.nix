@@ -113,6 +113,61 @@ in {
       '';
     };
 
+    ddns = {
+      enable = lib.mkEnableOption "Cloudflare dynamic DNS for the origin record(s)";
+
+      domains = lib.mkOption {
+        type = lib.types.listOf lib.types.str;
+        default = [ ];
+        example = [ "origin.example.com" ];
+        description = ''
+          Records to keep pointed at this host. Use one DNS-only origin name and make the
+          public vhost names proxied CNAMEs to it in the Cloudflare dashboard, so a single
+          record follows address changes. A pfSense hostname alias should also point at this
+          name, since a proxied name resolves to Cloudflare, not to this host.
+        '';
+      };
+
+      ipv4 = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Maintain an A record with the router's public IPv4 (the port-forward entry point).";
+      };
+
+      ipv6 = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = ''
+          Maintain an AAAA record. The updater publishes this host's outbound IPv6 source
+          address, so IPv6 privacy extensions must be off for the interface; otherwise it
+          publishes a temporary address that is gone within a day. On NetworkManager that is
+          `networking.networkmanager.connectionConfig."ipv6.ip6-privacy" = 0;`, otherwise
+          `networking.tempAddresses = "disabled";`.
+        '';
+      };
+
+      proxied = lib.mkOption {
+        type = lib.types.bool;
+        default = true;
+        description = "Orange-cloud the records. Keep false for a name that pfSense resolves.";
+      };
+
+      frequency = lib.mkOption {
+        type = lib.types.str;
+        default = "*:0/5";
+        description = "systemd calendar expression for the update timer.";
+      };
+
+      apiTokenFile = lib.mkOption {
+        type = lib.types.path;
+        default = "/var/lib/caddy/cloudflare-api-token";
+        description = ''
+          Cloudflare API token (Zone → Zone → Read, Zone → DNS → Edit). Defaults to the token
+          Caddy already uses for DNS-01; point it elsewhere for a separate, narrower token.
+        '';
+      };
+    };
+
     virtualHosts = lib.mkOption {
       type = lib.types.attrsOf (lib.types.submodule {
         options = {
@@ -161,7 +216,10 @@ in {
     assertions = [{
       assertion = cfg.publicPort != 443 && cfg.publicPort != 80;
       message = "modules.caddyReverseProxy.publicPort must differ from the LAN listeners (80, 443).";
-    }] ++ map (name: {
+    ] ++ lib.optional cfg.ddns.enable {
+      assertion = cfg.ddns.domains != [ ] && (cfg.ddns.ipv4 || cfg.ddns.ipv6);
+      message = "modules.caddyReverseProxy.ddns needs at least one domain and one of ipv4/ipv6.";
+    } ++ map (name: {
       assertion = lib.hasPrefix "*." name;
       message = "modules.caddyReverseProxy.wildcardCerts entry \"${name}\" must start with \"*.\".";
     }) cfg.wildcardCerts ++ lib.mapAttrsToList (name: vhost: {
@@ -233,6 +291,15 @@ in {
             }
           '';
         }) cfg.virtualHosts;
+    };
+    services.cloudflare-dyndns = lib.mkIf cfg.ddns.enable {
+      enable = true;
+      apiTokenFile = cfg.ddns.apiTokenFile;
+      domains = cfg.ddns.domains;
+      ipv4 = cfg.ddns.ipv4;
+      ipv6 = cfg.ddns.ipv6;
+      proxied = cfg.ddns.proxied;
+      frequency = cfg.ddns.frequency;
     };
   };
 }
