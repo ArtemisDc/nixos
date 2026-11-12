@@ -292,6 +292,8 @@ in {
           '';
         }) cfg.virtualHosts;
     };
+    # disable temp ips for dyndns
+    networking.tempAddresses = "disabled";
     services.cloudflare-dyndns = lib.mkIf cfg.ddns.enable {
       enable = true;
       apiTokenFile = cfg.ddns.apiTokenFile;
