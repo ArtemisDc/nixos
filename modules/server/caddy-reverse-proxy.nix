@@ -130,7 +130,7 @@ in {
 
       ipv4 = lib.mkOption {
         type = lib.types.bool;
-        default = true;
+        default = false;
         description = "Maintain an A record with the router's public IPv4 (the port-forward entry point).";
       };
 
