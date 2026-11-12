@@ -216,7 +216,7 @@ in {
     assertions = [{
       assertion = cfg.publicPort != 443 && cfg.publicPort != 80;
       message = "modules.caddyReverseProxy.publicPort must differ from the LAN listeners (80, 443).";
-    ] ++ lib.optional cfg.ddns.enable {
+    }] ++ lib.optional cfg.ddns.enable {
       assertion = cfg.ddns.domains != [ ] && (cfg.ddns.ipv4 || cfg.ddns.ipv6);
       message = "modules.caddyReverseProxy.ddns needs at least one domain and one of ipv4/ipv6.";
     } ++ map (name: {
