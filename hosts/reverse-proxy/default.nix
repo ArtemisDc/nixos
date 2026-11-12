@@ -46,7 +46,7 @@
       "autobrr.trester.net".upstream = "http://autobrr.int.trester.net:7474";
     };
     ddns = {
-      enable = false;
+      enable = true;
       domains = [ "reverse-proxy.trester.net" ];
       ipv6 = true;
     };
